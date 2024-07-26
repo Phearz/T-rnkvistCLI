@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "c:\\code\\TörnkvistCLI\\TörnkvistCLI\\TörnkvistCLI.csproj": {}
+    "C:\\code\\TörnkvistCLI\\TörnkvistCLI\\TörnkvistCLI.csproj": {}
   },
   "projects": {
-    "c:\\code\\TörnkvistCLI\\TörnkvistCLI\\TörnkvistCLI.csproj": {
+    "C:\\code\\TörnkvistCLI\\TörnkvistCLI\\TörnkvistCLI.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "c:\\code\\TörnkvistCLI\\TörnkvistCLI\\TörnkvistCLI.csproj",
+        "projectUniqueName": "C:\\code\\TörnkvistCLI\\TörnkvistCLI\\TörnkvistCLI.csproj",
         "projectName": "TörnkvistCLI",
-        "projectPath": "c:\\code\\TörnkvistCLI\\TörnkvistCLI\\TörnkvistCLI.csproj",
+        "projectPath": "C:\\code\\TörnkvistCLI\\TörnkvistCLI\\TörnkvistCLI.csproj",
         "packagesPath": "C:\\Users\\ennis\\.nuget\\packages\\",
-        "outputPath": "c:\\code\\TörnkvistCLI\\TörnkvistCLI\\obj\\",
+        "outputPath": "C:\\code\\TörnkvistCLI\\TörnkvistCLI\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\ennis\\AppData\\Roaming\\NuGet\\NuGet.Config"

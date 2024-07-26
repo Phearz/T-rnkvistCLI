@@ -13,3 +13,4 @@ c:\code\TörnkvistCLI\TörnkvistCLI\obj\Debug\net8.0\TörnkvistCLI.pdb
 c:\code\TörnkvistCLI\TörnkvistCLI\obj\Debug\net8.0\TörnkvistCLI.genruntimeconfig.cache
 c:\code\TörnkvistCLI\TörnkvistCLI\obj\Debug\net8.0\ref\TörnkvistCLI.dll
 c:\code\TörnkvistCLI\TörnkvistCLI\bin\Debug\net8.0\.env
+c:\code\TörnkvistCLI\TörnkvistCLI\obj\Debug\net8.0\TörnkvistCLI.sourcelink.json
