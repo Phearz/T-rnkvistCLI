@@ -6,6 +6,8 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using System;
 using System.IO;
+// using OpenQA.Selenium;
+// using OpenQA.Selenium.Chrome;
 
 
 namespace TörnkvistCLI
@@ -95,11 +97,17 @@ namespace TörnkvistCLI
             var response = await client.GetStringAsync(fullURL);
             return response;
         }
+        // private List<string> ParseHTML(string html)
+        // {
+        //     var programmerLinks = htmlDoc.DocumentNode.SelectNodes("//li[not(contains(@class, 'tocsection'))]")
+        //     return wikilink;
+        // }
 
         public async void Execute()
         {
             string url = "https://en.wikipedia.org/wiki/List_of_programmers";
 	        var response = CallURL(url).Result;
+            //var programmerLinks = htmlDoc.DocumentNode.SelectNodes("//li[not(contains(@class, 'tocsection'))]")
             System.Console.WriteLine(response);
 	        //return View();
         }
