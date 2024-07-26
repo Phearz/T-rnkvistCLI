@@ -1,0 +1,15 @@
+c:\code\TörnkvistCLI\TörnkvistCLI\obj\Debug\net8.0\TörnkvistCLI.GeneratedMSBuildEditorConfig.editorconfig
+c:\code\TörnkvistCLI\TörnkvistCLI\obj\Debug\net8.0\TörnkvistCLI.AssemblyInfoInputs.cache
+c:\code\TörnkvistCLI\TörnkvistCLI\obj\Debug\net8.0\TörnkvistCLI.AssemblyInfo.cs
+c:\code\TörnkvistCLI\TörnkvistCLI\obj\Debug\net8.0\TörnkvistCLI.csproj.CoreCompileInputs.cache
+c:\code\TörnkvistCLI\TörnkvistCLI\bin\Debug\net8.0\TörnkvistCLI.exe
+c:\code\TörnkvistCLI\TörnkvistCLI\bin\Debug\net8.0\TörnkvistCLI.deps.json
+c:\code\TörnkvistCLI\TörnkvistCLI\bin\Debug\net8.0\TörnkvistCLI.runtimeconfig.json
+c:\code\TörnkvistCLI\TörnkvistCLI\bin\Debug\net8.0\TörnkvistCLI.dll
+c:\code\TörnkvistCLI\TörnkvistCLI\bin\Debug\net8.0\TörnkvistCLI.pdb
+c:\code\TörnkvistCLI\TörnkvistCLI\obj\Debug\net8.0\TörnkvistCLI.dll
+c:\code\TörnkvistCLI\TörnkvistCLI\obj\Debug\net8.0\refint\TörnkvistCLI.dll
+c:\code\TörnkvistCLI\TörnkvistCLI\obj\Debug\net8.0\TörnkvistCLI.pdb
+c:\code\TörnkvistCLI\TörnkvistCLI\obj\Debug\net8.0\TörnkvistCLI.genruntimeconfig.cache
+c:\code\TörnkvistCLI\TörnkvistCLI\obj\Debug\net8.0\ref\TörnkvistCLI.dll
+c:\code\TörnkvistCLI\TörnkvistCLI\bin\Debug\net8.0\.env
