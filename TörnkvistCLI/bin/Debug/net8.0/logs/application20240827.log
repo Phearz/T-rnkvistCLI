@@ -1,0 +1,99 @@
+2024-08-27 14:46:41.189 +02:00 [INF] Application started
+2024-08-27 14:49:03.492 +02:00 [INF] Application started
+2024-08-27 16:02:22.286 +02:00 [INF] Application started
+2024-08-27 16:02:26.987 +02:00 [ERR] An unhandled exception occurred. System.ArgumentNullException: Value cannot be null. (Parameter 'logger')
+   at System.ThrowHelper.Throw(String paramName)
+   at System.ThrowHelper.ThrowIfNull(Object argument, String paramName)
+   at Microsoft.Extensions.Logging.LoggerExtensions.Log(ILogger logger, LogLevel logLevel, EventId eventId, Exception exception, String message, Object[] args)
+   at Microsoft.Extensions.Logging.LoggerExtensions.Log(ILogger logger, LogLevel logLevel, String message, Object[] args)
+   at Microsoft.Extensions.Logging.LoggerExtensions.LogInformation(ILogger logger, String message, Object[] args)
+   at TörnkvistCLI.ExitOption.Execute() in c:\code\TörnkvistCLI\TörnkvistCLI\Program.cs:line 53
+   at TörnkvistCLI.CLI.Run() in c:\code\TörnkvistCLI\TörnkvistCLI\Program.cs:line 172
+   at TörnkvistCLI.Program.Main(String[] args) in c:\code\TörnkvistCLI\TörnkvistCLI\Program.cs:line 259
+System.ArgumentNullException: Value cannot be null. (Parameter 'logger')
+   at System.ThrowHelper.Throw(String paramName)
+   at System.ThrowHelper.ThrowIfNull(Object argument, String paramName)
+   at Microsoft.Extensions.Logging.LoggerExtensions.Log(ILogger logger, LogLevel logLevel, EventId eventId, Exception exception, String message, Object[] args)
+   at Microsoft.Extensions.Logging.LoggerExtensions.Log(ILogger logger, LogLevel logLevel, String message, Object[] args)
+   at Microsoft.Extensions.Logging.LoggerExtensions.LogInformation(ILogger logger, String message, Object[] args)
+   at TörnkvistCLI.ExitOption.Execute() in c:\code\TörnkvistCLI\TörnkvistCLI\Program.cs:line 53
+   at TörnkvistCLI.CLI.Run() in c:\code\TörnkvistCLI\TörnkvistCLI\Program.cs:line 172
+   at TörnkvistCLI.Program.Main(String[] args) in c:\code\TörnkvistCLI\TörnkvistCLI\Program.cs:line 259
+2024-08-27 16:02:27.903 +02:00 [INF] Application Ended
+2024-08-27 16:03:34.095 +02:00 [INF] Application started
+2024-08-27 16:03:35.877 +02:00 [ERR] An unhandled exception occurred. System.ArgumentNullException: Value cannot be null. (Parameter 'logger')
+   at System.ThrowHelper.Throw(String paramName)
+   at System.ThrowHelper.ThrowIfNull(Object argument, String paramName)
+   at Microsoft.Extensions.Logging.LoggerExtensions.Log(ILogger logger, LogLevel logLevel, EventId eventId, Exception exception, String message, Object[] args)
+   at Microsoft.Extensions.Logging.LoggerExtensions.Log(ILogger logger, LogLevel logLevel, String message, Object[] args)
+   at Microsoft.Extensions.Logging.LoggerExtensions.LogInformation(ILogger logger, String message, Object[] args)
+   at TörnkvistCLI.ExitOption.Execute() in c:\code\TörnkvistCLI\TörnkvistCLI\Program.cs:line 53
+   at TörnkvistCLI.CLI.Run() in c:\code\TörnkvistCLI\TörnkvistCLI\Program.cs:line 172
+   at TörnkvistCLI.Program.Main(String[] args) in c:\code\TörnkvistCLI\TörnkvistCLI\Program.cs:line 259
+System.ArgumentNullException: Value cannot be null. (Parameter 'logger')
+   at System.ThrowHelper.Throw(String paramName)
+   at System.ThrowHelper.ThrowIfNull(Object argument, String paramName)
+   at Microsoft.Extensions.Logging.LoggerExtensions.Log(ILogger logger, LogLevel logLevel, EventId eventId, Exception exception, String message, Object[] args)
+   at Microsoft.Extensions.Logging.LoggerExtensions.Log(ILogger logger, LogLevel logLevel, String message, Object[] args)
+   at Microsoft.Extensions.Logging.LoggerExtensions.LogInformation(ILogger logger, String message, Object[] args)
+   at TörnkvistCLI.ExitOption.Execute() in c:\code\TörnkvistCLI\TörnkvistCLI\Program.cs:line 53
+   at TörnkvistCLI.CLI.Run() in c:\code\TörnkvistCLI\TörnkvistCLI\Program.cs:line 172
+   at TörnkvistCLI.Program.Main(String[] args) in c:\code\TörnkvistCLI\TörnkvistCLI\Program.cs:line 259
+2024-08-27 16:03:36.767 +02:00 [INF] Application Ended
+2024-08-27 16:44:49.362 +02:00 [INF] Application started
+2024-08-27 16:44:51.448 +02:00 [INF] Application is shutting down.
+2024-08-27 19:46:08.045 +02:00 [INF] Application started
+2024-08-27 19:46:08.092 +02:00 [ERR] An unhandled exception occurred. System.NotImplementedException: The method or operation is not implemented.
+   at WaterTemperature.op_Implicit(WaterTemperatureService v) in c:\code\TörnkvistCLI\TörnkvistCLI\DBContext.cs:line 13
+   at CLI..ctor(ILogger logger) in c:\code\TörnkvistCLI\TörnkvistCLI\Program.cs:line 244
+   at Program.Main(String[] args) in c:\code\TörnkvistCLI\TörnkvistCLI\Program.cs:line 360
+System.NotImplementedException: The method or operation is not implemented.
+   at WaterTemperature.op_Implicit(WaterTemperatureService v) in c:\code\TörnkvistCLI\TörnkvistCLI\DBContext.cs:line 13
+   at CLI..ctor(ILogger logger) in c:\code\TörnkvistCLI\TörnkvistCLI\Program.cs:line 244
+   at Program.Main(String[] args) in c:\code\TörnkvistCLI\TörnkvistCLI\Program.cs:line 360
+2024-08-27 19:46:09.027 +02:00 [INF] Application Ended
+2024-08-27 19:51:52.075 +02:00 [INF] Application started
+2024-08-27 19:51:52.110 +02:00 [INF] CLI started
+2024-08-27 19:51:55.133 +02:00 [INF] Executed menu option Hämta data ifrån SMHI API
+2024-08-27 19:51:55.233 +02:00 [WRN] Misslyckades med att hämta data från SMHI API. StatusCode: NotFound
+2024-08-27 19:52:01.878 +02:00 [INF] Executed menu option Hur lång tid är det till midnatt?
+2024-08-27 19:52:03.363 +02:00 [INF] Executed menu option Vad är det för Tid och Datum just nu?
+2024-08-27 19:52:06.352 +02:00 [INF] Executed menu option Hämta data ifrån SMHI API
+2024-08-27 19:52:06.397 +02:00 [WRN] Misslyckades med att hämta data från SMHI API. StatusCode: NotFound
+2024-08-27 19:52:10.186 +02:00 [INF] Executed menu option Starta vatten temperatur monitorering
+2024-08-27 19:52:10.187 +02:00 [INF] Monitoreringsagenten har startat och sparar temperaturen var 10:e sekund.
+2024-08-27 19:52:10.229 +02:00 [WRN] Misslyckades med att hämta data från SMHI API. StatusCode: NotFound
+2024-08-27 19:52:10.229 +02:00 [WRN] Misslyckades med att hämta vatten temperaturen.
+2024-08-27 19:52:20.275 +02:00 [WRN] Misslyckades med att hämta data från SMHI API. StatusCode: NotFound
+2024-08-27 19:52:20.276 +02:00 [WRN] Misslyckades med att hämta vatten temperaturen.
+2024-08-27 19:52:23.222 +02:00 [INF] Application is shutting down.
+2024-08-27 20:01:44.456 +02:00 [INF] Application started
+2024-08-27 20:01:44.494 +02:00 [INF] CLI started
+2024-08-27 20:01:46.583 +02:00 [INF] Executed menu option Hämta data ifrån SMHI API
+2024-08-27 20:01:46.696 +02:00 [WRN] Misslyckades med att hämta data från SMHI API. StatusCode: NotFound
+2024-08-27 20:05:53.148 +02:00 [INF] Application started
+2024-08-27 20:05:53.186 +02:00 [INF] CLI started
+2024-08-27 20:05:55.732 +02:00 [INF] Executed menu option Hämta data ifrån SMHI API
+2024-08-27 20:05:56.383 +02:00 [INF] Vatten temperaturen sparad i databasen.
+2024-08-27 20:06:07.311 +02:00 [INF] Executed menu option Starta vatten temperatur monitorering
+2024-08-27 20:06:07.312 +02:00 [INF] Monitoreringsagenten har startat och sparar temperaturen var 10:e sekund.
+2024-08-27 20:06:07.364 +02:00 [INF] Vatten temperatur hämtad: 17,7°C
+2024-08-27 20:06:07.422 +02:00 [INF] Vatten temperaturen sparad i databasen.
+2024-08-27 20:06:17.469 +02:00 [INF] Vatten temperatur hämtad: 17,7°C
+2024-08-27 20:06:17.516 +02:00 [INF] Vatten temperaturen sparad i databasen.
+2024-08-27 20:06:27.569 +02:00 [INF] Vatten temperatur hämtad: 17,7°C
+2024-08-27 20:06:27.578 +02:00 [INF] Vatten temperaturen sparad i databasen.
+2024-08-27 20:06:37.620 +02:00 [INF] Vatten temperatur hämtad: 17,7°C
+2024-08-27 20:06:37.626 +02:00 [INF] Vatten temperaturen sparad i databasen.
+2024-08-27 20:06:47.675 +02:00 [INF] Vatten temperatur hämtad: 17,7°C
+2024-08-27 20:06:47.679 +02:00 [INF] Vatten temperaturen sparad i databasen.
+2024-08-27 20:06:57.485 +02:00 [INF] Application is shutting down.
+2024-08-27 22:52:52.538 +02:00 [INF] Application started
+2024-08-27 22:52:52.577 +02:00 [INF] CLI started
+2024-08-27 22:53:03.581 +02:00 [INF] Executed menu option Hämta data ifrån SMHI API
+2024-08-27 22:53:04.235 +02:00 [INF] Vatten temperaturen sparad i databasen.
+2024-08-27 22:53:17.007 +02:00 [INF] Executed menu option Starta vatten temperatur monitorering
+2024-08-27 22:53:17.009 +02:00 [INF] Monitoreringsagenten har startat och sparar temperaturen var 10:e sekund.
+2024-08-27 22:53:17.055 +02:00 [INF] Vatten temperatur hämtad: 17,7°C
+2024-08-27 22:53:17.111 +02:00 [INF] Vatten temperaturen sparad i databasen.
+2024-08-27 22:53:25.265 +02:00 [INF] Application is shutting down.

@@ -1,8 +1,8 @@
 ﻿using Newtonsoft.Json.Linq;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Query.SqlExpressions;
-using Microsoft.Data.Sqlite;
-using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using Serilog;
+using ILogger = Microsoft.Extensions.Logging.ILogger;
+using System.Threading;
 
 namespace TörnkvistCLI
 {
@@ -14,12 +14,20 @@ namespace TörnkvistCLI
     }
     public class PrintOutHoursLeftToMidnightOption : IMenuOption
     {
+        public PrintOutHoursLeftToMidnightOption(ILogger logger)
+        {
+            Logger = logger;
+        }
+
         public int MenuIdentifier => 1;
         public string Description => "Hur lång tid är det till midnatt?";
+
+        public ILogger Logger { get; }
+
         public void Execute()
         {
             TimeSpan timeLeft = CalcHoursLeftToMidnight();
-            Console.WriteLine("Timmarna kvar till midnatt är: "+ timeLeft.Hours +" timmar, "+timeLeft.Minutes+" Minuter och "+timeLeft.Seconds+" Sekunder!");
+            Console.WriteLine("Timmarna kvar till midnatt är: " + timeLeft.Hours + " timmar, " + timeLeft.Minutes + " Minuter och " + timeLeft.Seconds + " Sekunder!");
         }
         private TimeSpan CalcHoursLeftToMidnight()
         {
@@ -31,38 +39,64 @@ namespace TörnkvistCLI
     }
     public class TimeNowOption : IMenuOption
     {
+        public TimeNowOption(ILogger logger)
+        {
+            Logger = logger;
+        }
+
         public int MenuIdentifier => 2;
         public string Description => "Vad är det för Tid och Datum just nu?";
+
+        public ILogger Logger { get; }
+
         public void Execute()
         {
-            System.Console.WriteLine("Datum och Tid just nu är "+DateTime.Now);
+            System.Console.WriteLine("Datum och Tid just nu är " + DateTime.Now);
         }
     }
-        public class ExitOption : IMenuOption
+    public class ExitOption : IMenuOption
+    {
+        public int MenuIdentifier => 5;
+        public string Description => "Avsluta Programet";
+        private readonly Microsoft.Extensions.Logging.ILogger _logger;
+        public ExitOption(Microsoft.Extensions.Logging.ILogger logger)
         {
-            public int MenuIdentifier => 4;
-            public string Description => "Avsluta Programet";
-        
-            public void Execute()
-            {
-                Environment.Exit(0);
-            }
+            _logger = logger;
         }
+
+        public void Execute()
+        {
+            // Logga att applikationen stängs ner
+            _logger.LogInformation("Application is shutting down.");
+
+            Log.CloseAndFlush();
+            Environment.Exit(0);
+        }
+    }
     public class FetchDataFromAPI : IMenuOption
     {
         public int MenuIdentifier => 3;
         public string Description => "Hämta data ifrån SMHI API";
 
+        private readonly WaterTemperatureService _waterTemperatureService;
+        private readonly AppConfig _config;
+
+        public FetchDataFromAPI(WaterTemperatureService waterTemperatureService, AppConfig config)
+        {
+            _waterTemperatureService = waterTemperatureService;
+            _config = config;
+        }
+
         public async void Execute()
         {
             System.Console.WriteLine("Fetching data...");
 
-            var temperature = await FetchWaterTemperatureAsync();
-        
-             if (temperature.HasValue)
+            var temperature = await _waterTemperatureService.FetchWaterTempatureAsync();
+
+            if (temperature.HasValue)
             {
                 System.Console.WriteLine($"Aktuell kustvattentemperatur i Varberg: {temperature.Value}°C");
-                SaveWaterTemperatureToDB(temperature.Value);
+                _waterTemperatureService.SaveWaterTemperatureToDB(temperature.Value,_config);
             }
             else
             {
@@ -70,173 +104,186 @@ namespace TörnkvistCLI
             }
 
         }
-
-        private void SaveWaterTemperatureToDB(double temperature)
+    }
+        public class AgentOption : IMenuOption
         {
-            using (var db = new AppDbContext())
-            {
-                var waterTemperature = new WaterTemperature
-                {
-                    Temperature = temperature,
-                    Date = DateTime.UtcNow,
-                    Location = "Station 61420"
-                };
-                try
-                {
-                    db.WaterTemperatures.Add(waterTemperature);
-                    db.SaveChanges();
-                    System.Console.WriteLine($"Temperatur sparad i databasen");
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"SQLite Error: {ex.Message}");
-                    throw;
-                }
-            }
+            public int MenuIdentifier => 4;
+            public string Description => "Starta vatten temperatur monitorering";
+
+        public WaterTemperature WaterTemperatureService { get; }
+        public ILogger Logger { get; }
+
+        private readonly WaterTemperatureService _waterTemperatureService;
+            private readonly ILogger _logger;
+            private readonly AppConfig _config;
+            private bool _isRunning = true;
+
+        public AgentOption(WaterTemperatureService waterTemperatureService, ILogger logger, AppConfig config)
+        {
+            _config = config;
+            _waterTemperatureService = waterTemperatureService;
+            _logger = logger;
         }
 
-        private async Task<double?> FetchWaterTemperatureAsync()
-        {
-            try
+        public void Execute()
             {
-                string url = "https://opendata-download-ocobs.smhi.se/api/version/1.0/parameter/5/station/35133/period/latest-day/data.json";
+                Thread agentThread = new Thread(StartAgent);
+                agentThread.IsBackground = true;
+                agentThread.Start();
+            }
 
-                using (var httpClient = new HttpClient())
+            private void StartAgent()
+            {
+                _logger.LogInformation("Monitoreringsagenten har startat och sparar temperaturen var 10:e sekund.");
+
+                while (_isRunning)
                 {
-                    var response = await httpClient.GetAsync(url);
-
-                    if (response.IsSuccessStatusCode)
+                    try
                     {
-                        var jsonData = await response.Content.ReadAsStringAsync();
-                        var jsonObject = JObject.Parse(jsonData);
-                        // Hämta det senaste temperaturvärdet
-                        var temperature = jsonObject["value"]?[0]?["value"]?.ToObject<double>();
-                        return temperature;
+                        //hämtar temperaturen och skriv till databasen
+                        var temperatur = _waterTemperatureService.FetchWaterTempatureAsync().Result;
+                        if (temperatur.HasValue)
+                        {
+                            _logger.LogInformation($"Vatten temperatur hämtad: {temperatur.Value}°C");
+                            _waterTemperatureService.SaveWaterTemperatureToDB(temperatur.Value,_config);
+                        }
+                        else
+                        {
+                            _logger.LogWarning("Misslyckades med att hämta vatten temperaturen.");
+                        }
+                    }
+                    catch (System.Exception ex)
+                    {
+                        _logger.LogError(ex, "Ett fel inträffade i agenten.");
+                        throw;
+                    }
+                    // Avvakta 10 sekunder innan den hämtar temperaturen igen.
+                    Thread.Sleep(_config.PollingInterval * 1000);
+                }
+                _logger.LogInformation("Agenten har stängts av");
+            }
+            public void StopAgent()
+            {
+                _isRunning = false;
+            }
+        }
+    }
+
+    
+    public class CLI
+    {
+        private List<IMenuOption> menuOptions;
+        private ILogger _logger;
+
+        private readonly AppConfig _config;
+        private WaterTemperatureService _waterTemperatureService;
+        //private static readonly HttpClient client = new HttpClient();
+        //private static readonly string apiKey = Environment.GetEnvironmentVariable("HOMEY_API_KEY");
+
+        public CLI(ILogger logger,AppConfig appConfig)
+        {
+            _config = appConfig;
+            _logger = logger;
+            _waterTemperatureService = new WaterTemperatureService(_logger,_config);
+
+            menuOptions = new List<IMenuOption>
+
+            {
+                new PrintOutHoursLeftToMidnightOption(_logger),
+                new TimeNowOption(_logger),
+                new FetchDataFromAPI(_waterTemperatureService,_config),
+                new AgentOption(_waterTemperatureService,_logger,_config),
+                new ExitOption(_logger)
+            };
+        }
+
+        public void Run()
+        {
+            PrintSplashScreen();
+            ShowMenyOptions();
+            _logger.LogInformation("CLI started");
+
+            while (true)
+            {
+                var key = Console.ReadKey(true);
+                if (char.IsDigit(key.KeyChar) && int.TryParse(key.KeyChar.ToString(), out int choice))
+                {
+                    var selectedOption = menuOptions.Find(option => option.MenuIdentifier == choice);
+                    if (selectedOption != null)
+                    {
+                        PrintSplashScreen();
+                        ShowMenyOptions();
+                        selectedOption.Execute();
+                        _logger.LogInformation($"Executed menu option {selectedOption.Description}");
                     }
                     else
                     {
-                        System.Console.WriteLine("Misslyckades med att hämta data från SMHI API. PGA: "+ response);
-                        return null;
+                        System.Console.WriteLine("Invalid choise, please try again.");
                     }
-                }
-            }
-            catch (Exception ex)
-            {
-                System.Console.WriteLine($"Ett fel inträffade: {ex.Message}");
-                return null;
-            }
-        }
-    }
-public class CLI
-{
-    private List<IMenuOption> menuOptions;
-    //private static readonly HttpClient client = new HttpClient();
-    //private static readonly string apiKey = Environment.GetEnvironmentVariable("HOMEY_API_KEY");
-
-    public CLI()
-    {
-        menuOptions = new List<IMenuOption>
-        {
-            new PrintOutHoursLeftToMidnightOption(),
-            new TimeNowOption(),
-            new FetchDataFromAPI(),
-            new ExitOption()
-        };
-    }
-
-        public void Run()
-    {
-        PrintSplashScreen();
-        ShowMenyOptions();
-        while(true)
-        {
-            var key  = Console.ReadKey(true);
-            if (char.IsDigit(key.KeyChar) && int.TryParse(key.KeyChar.ToString(), out int choice))
-            {
-                var selectedOption = menuOptions.Find(option => option.MenuIdentifier == choice);
-                if (selectedOption != null)
-                {   
-                    PrintSplashScreen();
-                    ShowMenyOptions();
-                    selectedOption.Execute();
                 }
                 else
                 {
-                    System.Console.WriteLine("Invalid choise, please try again.");
+                    System.Console.WriteLine("Invalid input, please select a number.");
                 }
             }
-            else
-            {
-                System.Console.WriteLine("Invalid input, please select a number.");
-            }
-        } 
-    }
-
-    private void ShowMenyOptions()
-    {
-        System.Console.WriteLine("What do you want to do?");
-        foreach (var option in menuOptions)
-        {
-            System.Console.WriteLine($"{option.MenuIdentifier}. {option.Description}");
         }
 
-    }
-    private static void PrintSplashScreen()
-    {
-        Console.Clear();
-        Console.WriteLine("Welcome to Törnkvist Feature CLI");
-        Console.WriteLine(" _____  \\/\\/  ____  _      _  __ _     _  ____  _____  ");
-        Console.WriteLine("/__ __\\/  _ \\/  __\\/ \\  /|/ |/ // \\ |\\/ \\/ ___\\/__ __\\ ");
-        Console.WriteLine("  / \\  | / \\||  \\/|| |\\ |||   / | | //| ||    \\  / \\   ");
-        Console.WriteLine("  | |  | \\_/||    /| | \\|||   \\ | \\// | |\\___ |  | |   ");
-        Console.WriteLine("  \\_/  \\____/\\_/\\_\\\\_/  \\|\\_|\\_\\\\__/  \\_/\\____/  \\_/   ");
-        Console.WriteLine("                                                      ");
-        Console.WriteLine(" ____  _     ____  _____ ____  _      _____ _____ ____ ");
-        Console.WriteLine("/ ___\\/ \\ /\\/  __\\/  __//  __\\/ \\__/|/  __//  __//  _ \\");
-        Console.WriteLine("|    \\| | |||  \\/||  \\  |  \\/|| |\\/|||  \\  | |  _| / \\|");
-        Console.WriteLine("\\___ || \\_/||  __/|  /_ |    /| |  |||  /_ | |_//| |-||");
-        Console.WriteLine("\\____/\\____/\\_/   \\____\\\\_/\\_\\\\_/  \\|\\____\\\\____\\\\_/ \\|");
-        Console.WriteLine("                                                      ");
-    }
-}
-public static class EnvLoader
-{
-    public static void Load(string filePath = ".env")
-    {
-        string fullPath = Path.GetFullPath(filePath);
-        Console.WriteLine($"Loading .env file from: {fullPath}");
-
-        if (!File.Exists(fullPath))
+        private void ShowMenyOptions()
         {
-            throw new FileNotFoundException($"The file '{fullPath}' does not exist.");
-        }
-
-        foreach (var line in File.ReadAllLines(fullPath))
-        {
-            if (string.IsNullOrWhiteSpace(line) || line.StartsWith("#"))
+            System.Console.WriteLine("What do you want to do?");
+            foreach (var option in menuOptions)
             {
-                continue;
+                System.Console.WriteLine($"{option.MenuIdentifier}. {option.Description}");
             }
 
-            var parts = line.Split('=', 2);
-            if (parts.Length != 2)
-            {
-                throw new InvalidOperationException($"Invalid line in .env file: '{line}'");
-            }
-
-            Environment.SetEnvironmentVariable(parts[0], parts[1]);
+        }
+        private static void PrintSplashScreen()
+        {
+            Console.Clear();
+            Console.WriteLine("Welcome to Törnkvist Feature CLI");
+            Console.WriteLine(" _____  \\/\\/  ____  _      _  __ _     _  ____  _____  ");
+            Console.WriteLine("/__ __\\/  _ \\/  __\\/ \\  /|/ |/ // \\ |\\/ \\/ ___\\/__ __\\ ");
+            Console.WriteLine("  / \\  | / \\||  \\/|| |\\ |||   / | | //| ||    \\  / \\   ");
+            Console.WriteLine("  | |  | \\_/||    /| | \\|||   \\ | \\// | |\\___ |  | |   ");
+            Console.WriteLine("  \\_/  \\____/\\_/\\_\\\\_/  \\|\\_|\\_\\\\__/  \\_/\\____/  \\_/   ");
+            Console.WriteLine("                                                      ");
+            Console.WriteLine(" ____  _     ____  _____ ____  _      _____ _____ ____ ");
+            Console.WriteLine("/ ___\\/ \\ /\\/  __\\/  __//  __\\/ \\__/|/  __//  __//  _ \\");
+            Console.WriteLine("|    \\| | |||  \\/||  \\  |  \\/|| |\\/|||  \\  | |  _| / \\|");
+            Console.WriteLine("\\___ || \\_/||  __/|  /_ |    /| |  |||  /_ | |_//| |-||");
+            Console.WriteLine("\\____/\\____/\\_/   \\____\\\\_/\\_\\\\_/  \\|\\____\\\\____\\\\_/ \\|");
+            Console.WriteLine("                                                      ");
         }
     }
-}
     class Program
     {
         static void Main(string[] args)
         {
             //Ladda in .env filen
-            EnvLoader.Load();
+            //EnvLoader.Load();
+            var config = AppConfig.Load("app.config");
+            
+            //skapa logger
+            using var loggerFactory = LoggingConfig.CreateLoggerFactory(config.LoggingLevel);
+            ILogger logger = loggerFactory.CreateLogger<Program>();
 
-            CLI cLI = new CLI();
-            cLI.Run();
+            //Logga applicationsstart
+            logger.LogInformation("Application started");
+
+            try
+            {
+                CLI cLI = new CLI(logger,config);
+                cLI.Run();
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "An unhandled exception occurred. " + ex);
+                throw;
+            }
+            finally
+            {
+                logger.LogInformation("Application Ended");
+                Serilog.Log.CloseAndFlush();
+            }
         }
     }
-}

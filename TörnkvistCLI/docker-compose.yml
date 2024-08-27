@@ -1,0 +1,29 @@
+version: '3.8'
+
+services:
+  app:
+    build: .
+    container_name: tornkvistcli_app
+    volumes:
+      - .:/app
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+    networks:
+      - appnetwork
+    depends_on:
+      - db
+
+  db:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: tornkvistcli_db
+    environment:
+      SA_PASSWORD: "ceasar101"
+      ACCEPT_EULA: "Y"
+    ports:
+      - "1433:1433"
+    networks:
+      - appnetwork
+
+networks:
+  appnetwork:
+    driver: bridge
