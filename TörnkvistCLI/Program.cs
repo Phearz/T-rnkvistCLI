@@ -1,14 +1,8 @@
-﻿// See https://aka.ms/new-console-template for more information
-using System.ComponentModel.Design;
-using System.Runtime.CompilerServices;
-using System.Collections.Generic;
-using System.Net.Http;
-using System.Threading.Tasks;
-using System;
-using System.IO;
-// using OpenQA.Selenium;
-// using OpenQA.Selenium.Chrome;
-
+﻿using Newtonsoft.Json.Linq;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Query.SqlExpressions;
+using Microsoft.Data.Sqlite;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace TörnkvistCLI
 {
@@ -44,10 +38,9 @@ namespace TörnkvistCLI
             System.Console.WriteLine("Datum och Tid just nu är "+DateTime.Now);
         }
     }
-
         public class ExitOption : IMenuOption
         {
-            public int MenuIdentifier => 3;
+            public int MenuIdentifier => 4;
             public string Description => "Avsluta Programet";
         
             public void Execute()
@@ -55,66 +48,85 @@ namespace TörnkvistCLI
                 Environment.Exit(0);
             }
         }
-
-    // public class FetchDataFromHomeyOption : IMenuOption
-    // {
-    //     public int MenuIdentifier => 4;
-    //     public string Description => "Hämta data från Homey";
-
-    //     private static readonly HttpClient client = new HttpClient();
-    //     private static readonly string apiKey = Environment.GetEnvironmentVariable("HOMEY_API_KEY");
-
-    //     public async void Execute()
-    //     {
-    //         try
-    //         {
-    //             if (string.IsNullOrEmpty(apiKey))
-    //             {
-    //                 Console.WriteLine("API-nyckel för Homey saknas. Vänligen sätt miljövariabeln 'HOMEY_API_KEY'.");
-    //                 return;
-    //             }
-
-    //             client.DefaultRequestHeaders.Add("Authorization", $"Bearer {apiKey}");
-    //             var response = await client.GetAsync("https://<your-homey-api-endpoint>");
-    //             response.EnsureSuccessStatusCode();
-    //             var responseBody = await response.Content.ReadAsStringAsync();
-    //             Console.WriteLine($"Data från Homey: {responseBody}");
-    //         }
-    //         catch (Exception e)
-    //         {
-    //             Console.WriteLine($"Fel vid hämtning av data från Homey: {e.Message}");
-    //         }
-    //     }
-    // }
-
-    public class FetchDataFromWikipediaOption : IMenuOption
+    public class FetchDataFromAPI : IMenuOption
     {
-        public int MenuIdentifier => 4;
-        public string Description => "Hämta data ifrån Wikipedia";
-        private static readonly HttpClient client = new HttpClient();
-        private static async Task<string> CallURL(string fullURL)
-        {
-            var response = await client.GetStringAsync(fullURL);
-            return response;
-        }
-        // private List<string> ParseHTML(string html)
-        // {
-        //     var programmerLinks = htmlDoc.DocumentNode.SelectNodes("//li[not(contains(@class, 'tocsection'))]")
-        //     return wikilink;
-        // }
+        public int MenuIdentifier => 3;
+        public string Description => "Hämta data ifrån SMHI API";
 
         public async void Execute()
         {
-            string url = "https://en.wikipedia.org/wiki/List_of_programmers";
-	        var response = CallURL(url).Result;
-            //var programmerLinks = htmlDoc.DocumentNode.SelectNodes("//li[not(contains(@class, 'tocsection'))]")
-            System.Console.WriteLine(response);
-	        //return View();
+            System.Console.WriteLine("Fetching data...");
+
+            var temperature = await FetchWaterTemperatureAsync();
+        
+             if (temperature.HasValue)
+            {
+                System.Console.WriteLine($"Aktuell kustvattentemperatur i Varberg: {temperature.Value}°C");
+                SaveWaterTemperatureToDB(temperature.Value);
+            }
+            else
+            {
+                System.Console.WriteLine("Kunde inte hämta kustvatten temperaturen ifrån SMHI.");
+            }
+
         }
 
+        private void SaveWaterTemperatureToDB(double temperature)
+        {
+            using (var db = new AppDbContext())
+            {
+                var waterTemperature = new WaterTemperature
+                {
+                    Temperature = temperature,
+                    Date = DateTime.UtcNow,
+                    Location = "Station 61420"
+                };
+                try
+                {
+                    db.WaterTemperatures.Add(waterTemperature);
+                    db.SaveChanges();
+                    System.Console.WriteLine($"Temperatur sparad i databasen");
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"SQLite Error: {ex.Message}");
+                    throw;
+                }
+            }
+        }
 
+        private async Task<double?> FetchWaterTemperatureAsync()
+        {
+            try
+            {
+                string url = "https://opendata-download-ocobs.smhi.se/api/version/1.0/parameter/5/station/35133/period/latest-day/data.json";
+
+                using (var httpClient = new HttpClient())
+                {
+                    var response = await httpClient.GetAsync(url);
+
+                    if (response.IsSuccessStatusCode)
+                    {
+                        var jsonData = await response.Content.ReadAsStringAsync();
+                        var jsonObject = JObject.Parse(jsonData);
+                        // Hämta det senaste temperaturvärdet
+                        var temperature = jsonObject["value"]?[0]?["value"]?.ToObject<double>();
+                        return temperature;
+                    }
+                    else
+                    {
+                        System.Console.WriteLine("Misslyckades med att hämta data från SMHI API. PGA: "+ response);
+                        return null;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Console.WriteLine($"Ett fel inträffade: {ex.Message}");
+                return null;
+            }
+        }
     }
-
 public class CLI
 {
     private List<IMenuOption> menuOptions;
@@ -127,9 +139,8 @@ public class CLI
         {
             new PrintOutHoursLeftToMidnightOption(),
             new TimeNowOption(),
-            new ExitOption(),
-            //new FetchDataFromHomeyOption()
-            new FetchDataFromWikipediaOption()
+            new FetchDataFromAPI(),
+            new ExitOption()
         };
     }
 
@@ -170,9 +181,8 @@ public class CLI
         }
 
     }
-
     private static void PrintSplashScreen()
-{
+    {
         Console.Clear();
         Console.WriteLine("Welcome to Törnkvist Feature CLI");
         Console.WriteLine(" _____  \\/\\/  ____  _      _  __ _     _  ____  _____  ");
@@ -187,8 +197,7 @@ public class CLI
         Console.WriteLine("\\___ || \\_/||  __/|  /_ |    /| |  |||  /_ | |_//| |-||");
         Console.WriteLine("\\____/\\____/\\_/   \\____\\\\_/\\_\\\\_/  \\|\\____\\\\____\\\\_/ \\|");
         Console.WriteLine("                                                      ");
-}
-
+    }
 }
 public static class EnvLoader
 {

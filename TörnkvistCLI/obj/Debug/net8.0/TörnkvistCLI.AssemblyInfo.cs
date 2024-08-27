@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("TörnkvistCLI")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+56e83c1250b176ab1b8192bc5ed8ad717aea24c3")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+6632ce22fb9c981b1181d3549987891c30295adb")]
 [assembly: System.Reflection.AssemblyProductAttribute("TörnkvistCLI")]
 [assembly: System.Reflection.AssemblyTitleAttribute("TörnkvistCLI")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
