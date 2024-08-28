@@ -1,0 +1,37 @@
+2024-08-28 08:41:19.507 +02:00 [INF] Application started
+2024-08-28 08:41:19.549 +02:00 [INF] CLI started
+2024-08-28 08:41:23.109 +02:00 [INF] Executed menu option Hämta data ifrån SMHI API
+2024-08-28 08:41:23.985 +02:00 [INF] Vatten temperaturen sparad i databasen.
+2024-08-28 08:41:27.804 +02:00 [INF] Application is shutting down.
+2024-08-28 09:38:15.888 +02:00 [INF] Application started
+2024-08-28 09:38:15.936 +02:00 [INF] CLI started
+2024-08-28 09:38:16.004 +02:00 [INF] Executed menu option Hämta data ifrån SMHI API
+2024-08-28 09:38:16.008 +02:00 [INF] Executed menu option Hämta data ifrån SMHI API
+2024-08-28 09:38:16.011 +02:00 [INF] Executed menu option Starta vatten temperatur monitorering
+2024-08-28 09:38:16.012 +02:00 [INF] Monitoreringsagenten har startat och sparar temperaturen var 10:e sekund.
+2024-08-28 09:38:16.178 +02:00 [INF] Vatten temperatur hämtad: 17,58°C
+2024-08-28 09:38:16.958 +02:00 [INF] Vatten temperaturen sparad i databasen.
+2024-08-28 09:38:17.085 +02:00 [INF] Vatten temperaturen sparad i databasen.
+2024-08-28 09:38:17.240 +02:00 [INF] Vatten temperaturen sparad i databasen.
+2024-08-28 09:38:25.370 +02:00 [INF] Application started
+2024-08-28 09:38:25.408 +02:00 [INF] CLI started
+2024-08-28 09:38:30.121 +02:00 [INF] Executed menu option Hämta data ifrån SMHI API
+2024-08-28 09:38:30.872 +02:00 [INF] Vatten temperaturen sparad i databasen.
+2024-08-28 09:38:35.919 +02:00 [INF] Executed menu option Starta vatten temperatur monitorering
+2024-08-28 09:38:35.920 +02:00 [INF] Monitoreringsagenten har startat och sparar temperaturen var 10:e sekund.
+2024-08-28 09:38:35.966 +02:00 [INF] Vatten temperatur hämtad: 17,58°C
+2024-08-28 09:38:36.082 +02:00 [INF] Vatten temperaturen sparad i databasen.
+2024-08-28 09:38:46.141 +02:00 [INF] Vatten temperatur hämtad: 17,58°C
+2024-08-28 09:38:46.160 +02:00 [INF] Vatten temperaturen sparad i databasen.
+2024-08-28 09:38:56.207 +02:00 [INF] Vatten temperatur hämtad: 17,58°C
+2024-08-28 09:38:56.216 +02:00 [INF] Vatten temperaturen sparad i databasen.
+2024-08-28 09:39:06.261 +02:00 [INF] Vatten temperatur hämtad: 17,58°C
+2024-08-28 09:39:06.266 +02:00 [INF] Vatten temperaturen sparad i databasen.
+2024-08-28 09:39:16.320 +02:00 [INF] Vatten temperatur hämtad: 17,58°C
+2024-08-28 09:39:16.327 +02:00 [INF] Vatten temperaturen sparad i databasen.
+2024-08-28 09:39:19.202 +02:00 [INF] Application is shutting down.
+2024-08-28 11:04:19.193 +02:00 [INF] Application started
+2024-08-28 11:04:19.233 +02:00 [INF] CLI started
+2024-08-28 11:04:22.310 +02:00 [INF] Executed menu option Hämta data ifrån SMHI API
+2024-08-28 11:04:23.013 +02:00 [INF] Vatten temperaturen sparad i databasen.
+2024-08-28 11:04:25.794 +02:00 [INF] Application is shutting down.

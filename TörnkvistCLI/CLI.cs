@@ -3,15 +3,12 @@ using Microsoft.Extensions.Logging;
 using Serilog;
 using ILogger = Microsoft.Extensions.Logging.ILogger;
 using System.Threading;
+using TörnkvistCLI.Data;
+using TörnkvistCLI;
 
 namespace TörnkvistCLI
 {
-    public interface IMenuOption
-    {
-        int MenuIdentifier { get; }
-        string Description { get; }
-        void Execute();
-    }
+
     public class PrintOutHoursLeftToMidnightOption : IMenuOption
     {
         public PrintOutHoursLeftToMidnightOption(ILogger logger)
@@ -54,25 +51,7 @@ namespace TörnkvistCLI
             System.Console.WriteLine("Datum och Tid just nu är " + DateTime.Now);
         }
     }
-    public class ExitOption : IMenuOption
-    {
-        public int MenuIdentifier => 5;
-        public string Description => "Avsluta Programet";
-        private readonly Microsoft.Extensions.Logging.ILogger _logger;
-        public ExitOption(Microsoft.Extensions.Logging.ILogger logger)
-        {
-            _logger = logger;
-        }
 
-        public void Execute()
-        {
-            // Logga att applikationen stängs ner
-            _logger.LogInformation("Application is shutting down.");
-
-            Log.CloseAndFlush();
-            Environment.Exit(0);
-        }
-    }
     public class FetchDataFromAPI : IMenuOption
     {
         public int MenuIdentifier => 3;
@@ -96,7 +75,7 @@ namespace TörnkvistCLI
             if (temperature.HasValue)
             {
                 System.Console.WriteLine($"Aktuell kustvattentemperatur i Varberg: {temperature.Value}°C");
-                _waterTemperatureService.SaveWaterTemperatureToDB(temperature.Value,_config);
+                _waterTemperatureService.SaveWaterTemperatureToDB(temperature.Value, _config);
             }
             else
             {
@@ -105,71 +84,89 @@ namespace TörnkvistCLI
 
         }
     }
-        public class AgentOption : IMenuOption
-        {
-            public int MenuIdentifier => 4;
-            public string Description => "Starta vatten temperatur monitorering";
-
-        public WaterTemperature WaterTemperatureService { get; }
+    public class AgentOption : IMenuOption
+    {
+        public int MenuIdentifier => 4;
+        public string Description => "Starta vatten temperatur monitorering";
+        public WaterTemperatureService WaterTemperatureService { get; }
         public ILogger Logger { get; }
 
-        private readonly WaterTemperatureService _waterTemperatureService;
-            private readonly ILogger _logger;
-            private readonly AppConfig _config;
-            private bool _isRunning = true;
+        //private readonly WaterTemperatureService _waterTemperatureService;
+        //private readonly ILogger _logger;
+        private readonly AppConfig _config;
+        private bool _isRunning = true;
 
         public AgentOption(WaterTemperatureService waterTemperatureService, ILogger logger, AppConfig config)
         {
-            _config = config;
-            _waterTemperatureService = waterTemperatureService;
+            _config = config ?? throw new ArgumentException(nameof(config));
+            WaterTemperatureService = waterTemperatureService ?? throw new ArgumentException(nameof(waterTemperatureService));
+            Logger = logger ?? throw new ArgumentException(nameof(logger));
+        }
+
+        public void Execute()
+        {
+            Thread agentThread = new Thread(StartAgent);
+            agentThread.IsBackground = true;
+            agentThread.Start();
+        }
+
+        private void StartAgent()
+        {
+            Logger.LogInformation("Monitoreringsagenten har startat och sparar temperaturen var 10:e sekund.");
+
+            while (_isRunning)
+            {
+                try
+                {
+                    //hämtar temperaturen och skriv till databasen
+                    var temperatur = WaterTemperatureService.FetchWaterTempatureAsync().Result;
+                    if (temperatur.HasValue)
+                    {
+                        Logger.LogInformation($"Vatten temperatur hämtad: {temperatur.Value}°C");
+                        WaterTemperatureService.SaveWaterTemperatureToDB(temperatur.Value, _config);
+                    }
+                    else
+                    {
+                        Logger.LogWarning("Misslyckades med att hämta vatten temperaturen.");
+                    }
+                }
+                catch (System.Exception ex)
+                {
+                    Logger.LogError(ex, "Ett fel inträffade i agenten.");
+                    throw;
+                }
+                // Avvakta 10 sekunder innan den hämtar temperaturen igen.
+                Thread.Sleep(_config.PollingInterval * 1000);
+            }
+            Logger.LogInformation("Agenten har stängts av");
+        }
+        public void StopAgent()
+        {
+            _isRunning = false;
+        }
+    }
+    public class ExitOption : IMenuOption
+    {
+        public int MenuIdentifier => 5;
+        public string Description => "Avsluta Programet";
+        private readonly Microsoft.Extensions.Logging.ILogger _logger;
+        public ExitOption(Microsoft.Extensions.Logging.ILogger logger)
+        {
             _logger = logger;
         }
 
         public void Execute()
-            {
-                Thread agentThread = new Thread(StartAgent);
-                agentThread.IsBackground = true;
-                agentThread.Start();
-            }
+        {
+            // Logga att applikationen stängs ner
+            _logger.LogInformation("Application is shutting down.");
 
-            private void StartAgent()
-            {
-                _logger.LogInformation("Monitoreringsagenten har startat och sparar temperaturen var 10:e sekund.");
-
-                while (_isRunning)
-                {
-                    try
-                    {
-                        //hämtar temperaturen och skriv till databasen
-                        var temperatur = _waterTemperatureService.FetchWaterTempatureAsync().Result;
-                        if (temperatur.HasValue)
-                        {
-                            _logger.LogInformation($"Vatten temperatur hämtad: {temperatur.Value}°C");
-                            _waterTemperatureService.SaveWaterTemperatureToDB(temperatur.Value,_config);
-                        }
-                        else
-                        {
-                            _logger.LogWarning("Misslyckades med att hämta vatten temperaturen.");
-                        }
-                    }
-                    catch (System.Exception ex)
-                    {
-                        _logger.LogError(ex, "Ett fel inträffade i agenten.");
-                        throw;
-                    }
-                    // Avvakta 10 sekunder innan den hämtar temperaturen igen.
-                    Thread.Sleep(_config.PollingInterval * 1000);
-                }
-                _logger.LogInformation("Agenten har stängts av");
-            }
-            public void StopAgent()
-            {
-                _isRunning = false;
-            }
+            Log.CloseAndFlush();
+            Environment.Exit(0);
         }
     }
 
-    
+
+
     public class CLI
     {
         private List<IMenuOption> menuOptions;
@@ -177,17 +174,16 @@ namespace TörnkvistCLI
 
         private readonly AppConfig _config;
         private WaterTemperatureService _waterTemperatureService;
-        //private static readonly HttpClient client = new HttpClient();
-        //private static readonly string apiKey = Environment.GetEnvironmentVariable("HOMEY_API_KEY");
+        private MenuIdentifier _menuIdentifier;
 
-        public CLI(ILogger logger,AppConfig appConfig)
+        public CLI(ILogger logger, AppConfig appConfig)
         {
             _config = appConfig;
             _logger = logger;
-            _waterTemperatureService = new WaterTemperatureService(_logger,_config);
+            _waterTemperatureService = new WaterTemperatureService(_logger, _config);
+            _menuIdentifier = new MenuIdentifier();
 
             menuOptions = new List<IMenuOption>
-
             {
                 new PrintOutHoursLeftToMidnightOption(_logger),
                 new TimeNowOption(_logger),
@@ -199,8 +195,8 @@ namespace TörnkvistCLI
 
         public void Run()
         {
-            PrintSplashScreen();
-            ShowMenyOptions();
+            MenuIdentifier.PrintSplashScreen();
+            _menuIdentifier.ShowMenyOptions(menuOptions);
             _logger.LogInformation("CLI started");
 
             while (true)
@@ -211,8 +207,8 @@ namespace TörnkvistCLI
                     var selectedOption = menuOptions.Find(option => option.MenuIdentifier == choice);
                     if (selectedOption != null)
                     {
-                        PrintSplashScreen();
-                        ShowMenyOptions();
+                        MenuIdentifier.PrintSplashScreen();
+                        _menuIdentifier.ShowMenyOptions(menuOptions);
                         selectedOption.Execute();
                         _logger.LogInformation($"Executed menu option {selectedOption.Description}");
                     }
@@ -228,32 +224,7 @@ namespace TörnkvistCLI
             }
         }
 
-        private void ShowMenyOptions()
-        {
-            System.Console.WriteLine("What do you want to do?");
-            foreach (var option in menuOptions)
-            {
-                System.Console.WriteLine($"{option.MenuIdentifier}. {option.Description}");
-            }
 
-        }
-        private static void PrintSplashScreen()
-        {
-            Console.Clear();
-            Console.WriteLine("Welcome to Törnkvist Feature CLI");
-            Console.WriteLine(" _____  \\/\\/  ____  _      _  __ _     _  ____  _____  ");
-            Console.WriteLine("/__ __\\/  _ \\/  __\\/ \\  /|/ |/ // \\ |\\/ \\/ ___\\/__ __\\ ");
-            Console.WriteLine("  / \\  | / \\||  \\/|| |\\ |||   / | | //| ||    \\  / \\   ");
-            Console.WriteLine("  | |  | \\_/||    /| | \\|||   \\ | \\// | |\\___ |  | |   ");
-            Console.WriteLine("  \\_/  \\____/\\_/\\_\\\\_/  \\|\\_|\\_\\\\__/  \\_/\\____/  \\_/   ");
-            Console.WriteLine("                                                      ");
-            Console.WriteLine(" ____  _     ____  _____ ____  _      _____ _____ ____ ");
-            Console.WriteLine("/ ___\\/ \\ /\\/  __\\/  __//  __\\/ \\__/|/  __//  __//  _ \\");
-            Console.WriteLine("|    \\| | |||  \\/||  \\  |  \\/|| |\\/|||  \\  | |  _| / \\|");
-            Console.WriteLine("\\___ || \\_/||  __/|  /_ |    /| |  |||  /_ | |_//| |-||");
-            Console.WriteLine("\\____/\\____/\\_/   \\____\\\\_/\\_\\\\_/  \\|\\____\\\\____\\\\_/ \\|");
-            Console.WriteLine("                                                      ");
-        }
     }
     class Program
     {
@@ -262,7 +233,7 @@ namespace TörnkvistCLI
             //Ladda in .env filen
             //EnvLoader.Load();
             var config = AppConfig.Load("app.config");
-            
+
             //skapa logger
             using var loggerFactory = LoggingConfig.CreateLoggerFactory(config.LoggingLevel);
             ILogger logger = loggerFactory.CreateLogger<Program>();
@@ -272,7 +243,7 @@ namespace TörnkvistCLI
 
             try
             {
-                CLI cLI = new CLI(logger,config);
+                CLI cLI = new CLI(logger, config);
                 cLI.Run();
             }
             catch (Exception ex)
@@ -287,3 +258,4 @@ namespace TörnkvistCLI
             }
         }
     }
+}

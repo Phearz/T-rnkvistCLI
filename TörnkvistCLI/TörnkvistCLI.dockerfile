@@ -18,7 +18,7 @@ WORKDIR /app
 COPY --from=build /app/out .
 
 # Exponera en port (om du kör en webapplikation)
-EXPOSE 80
+# EXPOSE 80
 
 # Starta applikationen
 ENTRYPOINT ["dotnet", "TörnkvistCLI.dll"]
